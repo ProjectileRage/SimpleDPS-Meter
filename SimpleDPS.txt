@@ -1,7 +1,8 @@
 ## Title: SimpleDPS
 ## Author: ProjectileRage
-## AddonVersion: 4
-## APIVersion: 100033
+## AddonVersion: 4.1.101033
+## APIVersion: 101033 101032 101031 100035 100034 100033
+## IsLibrary: false
 ## SavedVariables: SimpleDPSSavedVariables
 
 #LUA
