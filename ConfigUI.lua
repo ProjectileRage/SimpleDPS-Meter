@@ -14,23 +14,47 @@ SimpleDPS.ConfigUI = {
 	
 	initialize = function (self)
 		-- Stats Shown
-		SimpleDPSConfigMenuSectionStatsShownName:SetWidth(190)
-		SimpleDPSConfigMenuSectionStatsShownName:ClearAnchors()
-		SimpleDPSConfigMenuSectionStatsShownName:SetAnchor(LEFT, SimpleDPSConfigMenuSectionStatsShown, LEFT, 0, 0)
-		SimpleDPSConfigMenuSectionStatsShownDropdown:SetWidth(200)
-		SimpleDPSConfigMenuSectionStatsShownDropdown:SetAnchor(LEFT, SimpleDPSConfigMenuSectionStatsShownName, RIGHT, 0, 0)
-		ZO_SharedOptions:InitializeControl(SimpleDPSConfigMenuSectionStatsShown)
-		ZO_ComboBox_ObjectFromContainer(SimpleDPSConfigMenuSectionStatsShownDropdown):SetSelectedItemText(SimpleDPS.config.damageFormat)	
+		statsshown = ZO_ComboBox_ObjectFromContainer(SimpleDPSConfigMenuSectionStatsShownDropdown)
+		statsshown.m_sortOrder = false
+		formatEntries = {
+			"DPS",
+			"Percentage",
+			"Total",
+			"DPS (Percentage)",
+			"Percentage (DPS)",
+			"Total (DPS)",
+			"DPS (Total)",
+			"Total (Percentage)",
+			"Percentage (Total)",
+			"Total (DPS) Percentage",
+			"Total (Percentage) DPS",
+			"Percentage (DPS) Total",
+			"Percentage (Total) DPS",
+			"DPS (Total) Percentage",
+			"DPS (Percentage) Total"
+		}
+
+		for k, v in pairs(formatEntries) do
+			item = statsshown:CreateItemEntry(v, function () CALLBACK_MANAGER:FireCallbacks(SimpleDPS.FORMAT_CHANGED) end)
+			statsshown:AddItem(item)
+		end
+		statsshown:SetSelectedItemText(SimpleDPS.config.damageFormat)
 		CALLBACK_MANAGER:RegisterCallback(SimpleDPS.FORMAT_CHANGED, function() self:changeDamageFormat() end, SimpleDPS.name .. "StatsShownClick")
 		
 		-- Current Fight Behavior
-		SimpleDPSConfigMenuSectionCurrentFightBehaviorName:SetWidth(190)
-		SimpleDPSConfigMenuSectionCurrentFightBehaviorName:ClearAnchors()
-		SimpleDPSConfigMenuSectionCurrentFightBehaviorName:SetAnchor(LEFT, SimpleDPSConfigMenuSectionCurrentFightBehavior, LEFT, 0, 0)
-		SimpleDPSConfigMenuSectionCurrentFightBehaviorDropdown:SetWidth(280)
-		SimpleDPSConfigMenuSectionCurrentFightBehaviorDropdown:SetAnchor(LEFT, SimpleDPSConfigMenuSectionCurrentFightBehaviorName, RIGHT, 0, 0)
-		ZO_SharedOptions:InitializeControl(SimpleDPSConfigMenuSectionCurrentFightBehavior)
-		ZO_ComboBox_ObjectFromContainer(SimpleDPSConfigMenuSectionCurrentFightBehaviorDropdown):SetSelectedItemText(SimpleDPSConfigMenuSectionCurrentFightBehavior.data.itemText[SimpleDPS.config.resetBehavior])	
+		fightBehavior = ZO_ComboBox_ObjectFromContainer(SimpleDPSConfigMenuSectionCurrentFightBehaviorDropdown)
+		fightBehavior.m_sortOrder = false
+		fightEntries = {
+			"Reset immediately after combat",
+			"Reset shortly after combat",
+			"Reset when re-entering combat"
+		}
+
+		for k, v in pairs(fightEntries) do
+			item = fightBehavior:CreateItemEntry(v, function () CALLBACK_MANAGER:FireCallbacks(SimpleDPS.BEHAVIOR_CHANGED) end)
+			fightBehavior:AddItem(item)
+		end
+		fightBehavior:SetSelectedItemText(fightEntries[SimpleDPS.config.resetBehavior])
 		CALLBACK_MANAGER:RegisterCallback(SimpleDPS.BEHAVIOR_CHANGED, function() self:changeCurrentFightBehavior() end, SimpleDPS.name .. "CurrentFightBehaviorClick")
 		
 		-- AutoHide
@@ -182,11 +206,12 @@ SimpleDPS.ConfigUI = {
 	end,
 	
 	changeCurrentFightBehavior = function (self)
-		local value = ZO_ComboBox_ObjectFromContainer(SimpleDPSConfigMenuSectionCurrentFightBehaviorDropdown):GetSelectedItem()
+		local combobox = ZO_ComboBox_ObjectFromContainer(SimpleDPSConfigMenuSectionCurrentFightBehaviorDropdown)
+		local value = combobox:GetSelectedItem()
 		local selectedIndex = 0
 		
-		for index, text in ipairs(SimpleDPSConfigMenuSectionCurrentFightBehavior.data.itemText) do
-			if value == text then
+		for index, item in ipairs(combobox:GetItems()) do
+			if value == item.name then
 				selectedIndex = index
 				break
 			end
